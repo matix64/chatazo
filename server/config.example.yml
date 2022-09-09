@@ -1,0 +1,2 @@
+mongo_url: "mongodb://127.0.0.1/db_name"
+redis_url: "redis://127.0.0.1/1"
