@@ -1,0 +1,8 @@
+{
+	"name": "chatazo",
+	"workspaces": [
+		"server",
+		"client"
+	]
+}
+
