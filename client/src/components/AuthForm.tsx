@@ -19,8 +19,7 @@ const useStyles = createStyles((theme) => ({
   wrapper: {
     backgroundSize: "cover",
     height: "100vh",
-    backgroundImage:
-      "url(https://img.wallpapic.com/i935-547-231/medium/cats-animals-domestic-cat-kitten-wallpaper.jpg)",
+    backgroundImage: "url(/src/assets/cat-sunset.jpg)",
   },
 
   form: {
@@ -29,11 +28,16 @@ const useStyles = createStyles((theme) => ({
     }`,
     height: "100%",
     maxWidth: 450,
-    paddingTop: 80,
+    display: "grid",
+    placeItems: "center",
 
     [`@media (max-width: ${theme.breakpoints.sm}px)`]: {
       maxWidth: "100%",
     },
+  },
+
+  formInner: {
+    width: "100%",
   },
 
   title: {
@@ -72,89 +76,82 @@ export function AuthForm({ onLogin }: AuthFormProps) {
   return (
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
-        <Title
-          order={2}
-          className={classes.title}
-          align="center"
-          mt="md"
-          mb={50}
-        >
-          Welcome back to Mantine!
-        </Title>
-        {error && (
-          <Alert
-            icon={<BiErrorCircle size={32} />}
-            title="Error"
-            color="red"
-            variant="outline"
-            withCloseButton
-            closeButtonLabel="Close alert"
-            onClose={() => setError(undefined)}
-          >
-            {error.message}
-          </Alert>
-        )}
-        <TextInput
-          label="Username"
-          mt="md"
-          size="md"
-          value={username}
-          onChange={setUsername}
-        />
-        {registering && (
+        <div className={classes.formInner}>
+          {error && (
+            <Alert
+              icon={<BiErrorCircle size={32} />}
+              title="Error"
+              color="red"
+              variant="outline"
+              withCloseButton
+              closeButtonLabel="Close alert"
+              onClose={() => setError(undefined)}
+            >
+              {error.message}
+            </Alert>
+          )}
           <TextInput
-            label="Email"
+            label="Username"
             mt="md"
             size="md"
-            value={email}
-            onChange={setEmail}
+            value={username}
+            onChange={setUsername}
           />
-        )}
-        <PasswordInput
-          label="Password"
-          mt="md"
-          size="md"
-          value={password}
-          onChange={setPassword}
-        />
-        {!registering && (
-          <Checkbox label="Keep me logged in" mt="xl" size="md" />
-        )}
-        <Button fullWidth mt="xl" size="md" onClick={send}>
-          {registering ? "Register" : "Login"}
-        </Button>
-
-        <Text align="center" mt="md">
-          {registering ? (
-            <>
-              {"Already have an account? "}
-              <Anchor<"a">
-                href=""
-                weight={700}
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  setRegistering(false);
-                }}
-              >
-                Login
-              </Anchor>
-            </>
-          ) : (
-            <>
-              {"Don't have an account? "}
-              <Anchor<"a">
-                href=""
-                weight={700}
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  setRegistering(true);
-                }}
-              >
-                Register
-              </Anchor>
-            </>
+          {registering && (
+            <TextInput
+              label="Email"
+              mt="md"
+              size="md"
+              value={email}
+              onChange={setEmail}
+            />
           )}
-        </Text>
+          <PasswordInput
+            label="Password"
+            mt="md"
+            size="md"
+            value={password}
+            onChange={setPassword}
+          />
+          {!registering && (
+            <Checkbox label="Keep me logged in" mt="xl" size="md" />
+          )}
+          <Button fullWidth mt="xl" size="md" onClick={send}>
+            {registering ? "Register" : "Login"}
+          </Button>
+
+          <Text align="center" mt="md">
+            {registering ? (
+              <>
+                {"Already have an account? "}
+                <Anchor<"a">
+                  href=""
+                  weight={700}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    setRegistering(false);
+                  }}
+                >
+                  Login
+                </Anchor>
+              </>
+            ) : (
+              <>
+                {"Don't have an account? "}
+                <Anchor<"a">
+                  href=""
+                  weight={700}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    setRegistering(true);
+                  }}
+                >
+                  Register
+                </Anchor>
+              </>
+            )}
+          </Text>
+        </div>
       </Paper>
     </div>
   );
