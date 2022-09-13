@@ -1,5 +1,6 @@
 import {
   OnGatewayConnection,
+  OnGatewayDisconnect,
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
@@ -20,7 +21,9 @@ import { Request } from "express";
 import { User } from "../users/models/user.schema";
 
 @WebSocketGateway()
-export class MessagesGateway implements OnGatewayConnection {
+export class MessagesGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
   clients: Record<string, Socket> = {};
