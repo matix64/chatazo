@@ -10,6 +10,7 @@ import {
 import { formatDistance } from "date-fns";
 import { getUser, User } from "../../../api/users";
 import { useEffect, useState } from "react";
+import { WsConnection } from "../../../api/socket";
 
 const useStyles = createStyles((theme) => ({
   event: {
@@ -42,14 +43,18 @@ const useStyles = createStyles((theme) => ({
 
 interface MessageViewProps {
   msg: Message;
+  socket: WsConnection;
 }
 
-export function MessageView({ msg }: MessageViewProps) {
+export function MessageView({ msg, socket }: MessageViewProps) {
   const { classes } = useStyles();
   const [author, setAuthor] = useState<User | undefined>();
+
   useEffect(() => {
     getUser(msg.author).then(setAuthor);
+    return socket.onUserChanged(msg.author, setAuthor);
   }, []);
+
   if (msg.content[0]?.type == "event") {
     const descriptions: Record<EventMessageSection["event"], string> = {
       join: "joined",

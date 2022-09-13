@@ -10,9 +10,10 @@ import { ViewInvite } from "./ViewInvite";
 interface AppLoggedInProps {
   user: User;
   socket: WsConnection;
+  onLogout: () => void;
 }
 
-export function AppLoggedIn({ user, socket }: AppLoggedInProps) {
+export function AppLoggedIn({ user, socket, onLogout }: AppLoggedInProps) {
   const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
 
   const pathSections = window.location.pathname.split("/");
@@ -26,6 +27,7 @@ export function AppLoggedIn({ user, socket }: AppLoggedInProps) {
           <Sidebar
             user={user}
             socket={socket}
+            onLogout={onLogout}
             onRoomSelected={setSelectedRoom}
           />
         }

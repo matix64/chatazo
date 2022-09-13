@@ -14,6 +14,7 @@ function App() {
 
   function updateUser() {
     setLoading(true);
+    setSocket(undefined);
     getCurrentUser()
       .then((user) => {
         setUser(user);
@@ -22,12 +23,15 @@ function App() {
       .finally(() => setLoading(false));
   }
   useEffect(updateUser, []);
+  useEffect(() => {
+    if (socket) return socket.onUserChanged(user!.id, setUser);
+  }, [socket]);
 
   return (
     <MantineProvider theme={{ colorScheme: "dark" }}>
       <ModalsProvider>
         {user && socket ? (
-          <AppLoggedIn user={user} socket={socket} />
+          <AppLoggedIn user={user} socket={socket} onLogout={updateUser} />
         ) : loading ? (
           <LoadingScreen />
         ) : (

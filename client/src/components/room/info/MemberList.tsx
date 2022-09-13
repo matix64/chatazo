@@ -1,5 +1,4 @@
-import { Avatar, createStyles, Loader } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Avatar, createStyles } from "@mantine/core";
 import {
   editMember,
   getRoomMembers,
@@ -8,7 +7,7 @@ import {
   Room,
   RoomMember,
 } from "../../../api/rooms";
-import { getUser, User } from "../../../api/users";
+import { User } from "../../../api/users";
 
 const useStyles = createStyles((theme, _, getRef) => ({
   table: {

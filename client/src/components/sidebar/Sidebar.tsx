@@ -50,9 +50,15 @@ interface SidebarProps {
   user: User;
   socket: WsConnection;
   onRoomSelected: (room: Room | undefined) => void;
+  onLogout: () => void;
 }
 
-export function Sidebar({ user, socket, onRoomSelected }: SidebarProps) {
+export function Sidebar({
+  user,
+  socket,
+  onRoomSelected,
+  onLogout,
+}: SidebarProps) {
   const { classes } = useStyles();
   const modals = useModals();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -145,7 +151,7 @@ export function Sidebar({ user, socket, onRoomSelected }: SidebarProps) {
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
-        <UserButton {...user} />
+        <UserButton user={user} onLogout={onLogout} />
       </Navbar.Section>
     </Navbar>
   );

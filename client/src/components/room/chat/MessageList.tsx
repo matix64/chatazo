@@ -1,6 +1,7 @@
 import { createStyles, Loader } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "../../../api/messages";
+import { WsConnection } from "../../../api/socket";
 import {
   getScrollFromBottom,
   scrollToFromBottom,
@@ -35,12 +36,14 @@ interface MessageListProps {
   messages: Message[];
   noOlderMessages: boolean;
   loadOlder: (before: string | undefined) => void;
+  socket: WsConnection;
 }
 
 export function MessageList({
   messages,
   noOlderMessages,
   loadOlder,
+  socket,
 }: MessageListProps) {
   const { classes } = useStyles();
   const viewport = useRef<HTMLDivElement>(null);
@@ -118,7 +121,7 @@ export function MessageList({
         </div>
       )}
       {messages.map((msg) => (
-        <MessageView key={msg.id} msg={msg} />
+        <MessageView key={msg.id} msg={msg} socket={socket} />
       ))}
     </div>
   );

@@ -32,6 +32,10 @@ export async function register(
   await login(username, password);
 }
 
+export async function logout(): Promise<void> {
+  await apiRequest("auth/logout", { method: "POST" });
+}
+
 export class InvalidCredentialsError extends Error {
   constructor() {
     super("The user doesn't exist or the password is incorrect");

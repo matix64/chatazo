@@ -67,6 +67,7 @@ export function Chat({ room, socket, onOpenInfo }: ChatProps) {
           messages={messages}
           noOlderMessages={noOlderMessages}
           loadOlder={loadMessages}
+          socket={socket}
         />
       )}
       <MessageEditor
