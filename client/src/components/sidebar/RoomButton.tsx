@@ -4,9 +4,10 @@ import { Room } from "../../api/rooms";
 const useStyles = createStyles((theme) => ({
   link: {
     fontWeight: 500,
-    display: "flex",
-    alignItems: "center",
+    display: "block",
     width: "100%",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
     color: theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.black,
     fontSize: theme.fontSizes.sm,
@@ -49,9 +50,7 @@ export function RoomButton({
       onClick={onClick}
       className={cx(classes.link, { [classes.selectedLink]: selected })}
     >
-      <Box ml="md" sx={{ flexGrow: 1 }}>
-        {room.name}
-      </Box>
+      {room.name}
     </UnstyledButton>
   );
 }

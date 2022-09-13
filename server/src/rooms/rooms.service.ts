@@ -2,34 +2,45 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Room, RoomDocument, RoomMember } from './models/room.schema';
-import { Model } from 'mongoose';
-import { UnsubscribeFunc } from '../common';
-import { Role } from './models/roles';
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Room, RoomDocument, RoomMember } from "./models/room.schema";
+import { Model } from "mongoose";
+import { Role } from "./models/roles";
+import { EventEmitter } from "stream";
 
-type RoomMemberCallback = (userId: string, room: Room) => void;
+export const ROOM_EVENTS = {
+  joinedRoom: "joinedRoom",
+  leftRoom: "leftRoom",
+  roomChanged: "roomChanged",
+};
+
+export interface RoomMemberEvent {
+  userId: string;
+  room: Room;
+}
+
+export type RoomChangedEvent = Room;
 
 @Injectable()
-export class RoomsService {
-  private readonly joinedRoomSubs: RoomMemberCallback[] = [];
-  private readonly leftRoomSubs: RoomMemberCallback[] = [];
-
-  constructor(@InjectModel(Room.name) private roomModel: Model<RoomDocument>) {}
+export class RoomsService extends EventEmitter {
+  constructor(@InjectModel(Room.name) private roomModel: Model<RoomDocument>) {
+    super();
+  }
 
   async create(name: string, owner: string): Promise<Room> {
     const created = new this.roomModel({
       name,
       members: { id: owner, role: Role.Owner },
     });
-    const saved = await created.save();
-    this.joinedRoomSubs.forEach((cb) => cb(owner, saved));
-    return saved;
+    const room = await created.save();
+    const event: RoomMemberEvent = { userId: owner, room };
+    this.emit(ROOM_EVENTS.joinedRoom, event);
+    return room;
   }
 
   getAllWithUser(user: string): Promise<Room[]> {
-    return this.roomModel.find({ 'members.id': user }).exec();
+    return this.roomModel.find({ "members.id": user }).exec();
   }
 
   getById(id: string): Promise<Room | null> {
@@ -40,20 +51,27 @@ export class RoomsService {
     return this.roomModel.findByIdAndDelete(id).exec();
   }
 
-  patch(id: string, patches: Pick<Partial<Room>, 'name'>): Promise<Room> {
-    return this.roomModel
-      .findByIdAndUpdate(id, { $set: patches }, { runValidators: true })
-      .exec();
+  async patch(id: string, patches: Pick<Partial<Room>, "name">): Promise<Room> {
+    const room = await this.roomModel.findByIdAndUpdate(
+      id,
+      { $set: patches },
+      { runValidators: true, new: true }
+    );
+    if (!room) throw new NotFoundException();
+    const event: RoomChangedEvent = room;
+    this.emit(ROOM_EVENTS.roomChanged, event);
+    return room;
   }
 
   async addMember(roomId: string, userId: string): Promise<Room> {
     const room = await this.roomModel.findOneAndUpdate(
-      { _id: roomId, 'members.id': { $ne: userId } },
+      { _id: roomId, "members.id": { $ne: userId } },
       { $push: { members: { id: userId, role: Role.Member } } },
-      { runValidators: true },
+      { runValidators: true, new: true }
     );
     if (!room) throw new NotFoundException();
-    this.joinedRoomSubs.forEach((cb) => cb(userId, room));
+    const event: RoomMemberEvent = { userId, room };
+    this.emit(ROOM_EVENTS.joinedRoom, event);
     return room;
   }
 
@@ -65,8 +83,8 @@ export class RoomsService {
   async patchMember(
     roomId: string,
     userId: string,
-    patches: Pick<Partial<RoomMember>, 'role'>,
-    belowRole: Role,
+    patches: Pick<Partial<RoomMember>, "role">,
+    belowRole: Role
   ): Promise<Room> {
     const room = await this.roomModel.findOneAndUpdate(
       {
@@ -75,13 +93,10 @@ export class RoomsService {
       },
       {
         $set: Object.fromEntries(
-          Object.entries(patches).map(([key, val]) => [
-            'members.$.' + key,
-            val,
-          ]),
+          Object.entries(patches).map(([key, val]) => ["members.$." + key, val])
         ),
       },
-      { runValidators: true },
+      { runValidators: true, new: true }
     );
     if (!room) throw new NotFoundException();
     return room;
@@ -95,28 +110,20 @@ export class RoomsService {
   async removeMember(
     roomId: string,
     userId: string,
-    belowRole: Role,
+    belowRole: Role
   ): Promise<Room> {
     const room = await this.roomModel.findByIdAndUpdate(
       roomId,
       {
         $pull: { members: { id: userId, role: { $lt: belowRole } } },
       },
+      { new: true }
     );
     if (!room) throw new NotFoundException();
     if (room.members.find((m) => m.id == userId))
       throw new ForbiddenException();
-    this.leftRoomSubs.forEach((cb) => cb(userId, room));
+    const event: RoomMemberEvent = { userId, room };
+    this.emit(ROOM_EVENTS.leftRoom, event);
     return room;
-  }
-
-  subscribeJoinedRoom(cb: RoomMemberCallback): UnsubscribeFunc {
-    this.joinedRoomSubs.push(cb);
-    return () => this.joinedRoomSubs.splice(this.joinedRoomSubs.indexOf(cb, 1));
-  }
-
-  subscribeLeftRoom(cb: RoomMemberCallback): UnsubscribeFunc {
-    this.leftRoomSubs.push(cb);
-    return () => this.leftRoomSubs.splice(this.leftRoomSubs.indexOf(cb, 1));
   }
 }

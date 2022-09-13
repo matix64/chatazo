@@ -22,7 +22,13 @@ export function AppLoggedIn({ user, socket }: AppLoggedInProps) {
   } else {
     return (
       <AppShell
-        navbar={<Sidebar user={user} onRoomSelected={setSelectedRoom} />}
+        navbar={
+          <Sidebar
+            user={user}
+            socket={socket}
+            onRoomSelected={setSelectedRoom}
+          />
+        }
         styles={(theme) => ({
           main: {
             backgroundColor:

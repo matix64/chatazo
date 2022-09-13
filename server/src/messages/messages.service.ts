@@ -1,32 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
 import {
   AnyMessageSection,
   Message,
   MessageDocument,
-} from './models/message.schema';
-import { Model, FilterQuery } from 'mongoose';
-import { UnsubscribeFunc } from '../common';
-import { RoomsService } from '../rooms/rooms.service';
+} from "./models/message.schema";
+import { Model, FilterQuery } from "mongoose";
+import {
+  RoomMemberEvent,
+  RoomsService,
+  ROOM_EVENTS,
+} from "../rooms/rooms.service";
+import { EventEmitter } from "stream";
 
-type NewMessageCallback = (m: Message) => void;
+export const MESSAGE_EVENTS = {
+  newMessage: "newMessage",
+};
+
+export type NewMessageEvent = Message;
 
 @Injectable()
-export class MessagesService {
-  private readonly newMessageSubs: NewMessageCallback[] = [];
-
+export class MessagesService extends EventEmitter {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
-    private roomsService: RoomsService,
+    private roomsService: RoomsService
   ) {
-    this.roomsService.subscribeJoinedRoom((user, room) =>
-      this.create(user, room._id.toString(), [
-        { type: 'event', event: 'join' },
-      ]),
-    );
-    this.roomsService.subscribeLeftRoom((user, room) => {
-      this.create(user, room._id.toString(), [
-        { type: 'event', event: 'leave' },
+    super();
+    this.roomsService.on(ROOM_EVENTS.joinedRoom, (event: RoomMemberEvent) => {
+      this.create(event.userId, event.room._id.toString(), [
+        { type: "event", event: "join" },
+      ]);
+    });
+    this.roomsService.on(ROOM_EVENTS.leftRoom, (event: RoomMemberEvent) => {
+      this.create(event.userId, event.room._id.toString(), [
+        { type: "event", event: "leave" },
       ]);
     });
   }
@@ -34,18 +41,18 @@ export class MessagesService {
   async create(
     author: string,
     room: string,
-    content: AnyMessageSection[],
+    content: AnyMessageSection[]
   ): Promise<Message> {
     const msg = new this.messageModel({ author, room, content });
     const saved = await msg.save();
-    this.newMessageSubs.forEach((s) => s(msg));
+    this.emit(MESSAGE_EVENTS.newMessage, msg);
     return saved;
   }
 
   get(
     room: string,
     before: string | undefined,
-    amount: number,
+    amount: number
   ): Promise<Message[]> {
     const filter: FilterQuery<MessageDocument> = { room };
     if (before) filter._id = { $lt: before };
@@ -54,10 +61,5 @@ export class MessagesService {
       .sort({ _id: -1 })
       .limit(amount)
       .exec();
-  }
-
-  subscribeNewMessages(cb: NewMessageCallback): UnsubscribeFunc {
-    this.newMessageSubs.push(cb);
-    return () => this.newMessageSubs.splice(this.newMessageSubs.indexOf(cb, 1));
   }
 }

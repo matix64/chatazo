@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { Role } from './roles';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Types } from "mongoose";
+import { Role } from "./roles";
 
 @Schema({ _id: false })
 export class RoomMember {
@@ -15,7 +15,7 @@ const RoomMemberSchema = SchemaFactory.createForClass(RoomMember);
 @Schema()
 export class Room {
   _id: Types.ObjectId;
-  @Prop({ required: true, minlength: 1, maxlength: 40 })
+  @Prop({ required: true, minlength: 1, maxlength: 40, trim: true })
   name: string;
   @Prop({ required: true, type: [RoomMemberSchema] })
   members: RoomMember[];
@@ -28,7 +28,7 @@ export type RoomDocument = Room & Document;
 
 RoomSchema.methods.getMember = function (
   this: Room,
-  memberId: string,
+  memberId: string
 ): RoomMember | undefined {
   return this.members.find((m) => m.id === memberId);
 };

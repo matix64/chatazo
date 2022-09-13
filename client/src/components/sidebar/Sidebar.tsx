@@ -1,19 +1,12 @@
 import { User } from "../../api/users";
-import {
-  Navbar,
-  Group,
-  Code,
-  ScrollArea,
-  createStyles,
-  Divider,
-  TextInput,
-  Button,
-} from "@mantine/core";
+import { Navbar, Group, Code, createStyles, Divider } from "@mantine/core";
 import { useModals } from "@mantine/modals";
 import { UserButton } from "./UserButton";
 import { RoomButton } from "./RoomButton";
 import { useEffect, useState } from "react";
-import { createRoom, getAllRooms, Room } from "../../api/rooms";
+import { getAllRooms, Room } from "../../api/rooms";
+import { WsConnection } from "../../api/socket";
+import { CreateRoomModal } from "./CreateRoomModal";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -36,6 +29,7 @@ const useStyles = createStyles((theme) => ({
   links: {
     marginLeft: -theme.spacing.md,
     marginRight: -theme.spacing.md,
+    overflowY: "auto",
   },
 
   linksInner: {
@@ -54,17 +48,33 @@ const useStyles = createStyles((theme) => ({
 
 interface SidebarProps {
   user: User;
+  socket: WsConnection;
   onRoomSelected: (room: Room | undefined) => void;
 }
 
-export function Sidebar({ user, onRoomSelected }: SidebarProps) {
+export function Sidebar({ user, socket, onRoomSelected }: SidebarProps) {
   const { classes } = useStyles();
   const modals = useModals();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
 
   useEffect(() => {
-    getAllRooms().then(setRooms);
+    getAllRooms().then((rooms) =>
+      setRooms(rooms.sort((a, b) => a.id.localeCompare(b.id)))
+    );
+    const unsubRoomChanged = socket.onRoomChanged((room) => {
+      setSelectedRoom((selected) => {
+        return selected?.id == room.id ? room : selected;
+      });
+      setRooms((rooms) =>
+        [...rooms.filter((r) => r.id != room.id), room].sort((a, b) =>
+          a.id.localeCompare(b.id)
+        )
+      );
+    });
+    return () => {
+      unsubRoomChanged();
+    };
   }, []);
 
   useEffect(() => {
@@ -80,26 +90,13 @@ export function Sidebar({ user, onRoomSelected }: SidebarProps) {
     const id = modals.openModal({
       title: "Create room",
       children: (
-        <>
-          <form
-            autoComplete="off"
-            onSubmit={(e) => {
-              e.preventDefault();
-              createRoom((e.target as HTMLFormElement).roomname.value).then(
-                (room) => {
-                  setRooms((r) => [...r, room]);
-                  setSelectedRoom(room);
-                }
-              );
-              modals.closeModal(id);
-            }}
-          >
-            <TextInput name="roomname" label="Name" />
-            <Button type="submit" fullWidth mt="md">
-              Create
-            </Button>
-          </form>
-        </>
+        <CreateRoomModal
+          onCreated={(room) => {
+            setRooms((rooms) => [...rooms, room]);
+            setSelectedRoom(room);
+            modals.closeModal(id);
+          }}
+        />
       ),
     });
   }
@@ -118,7 +115,7 @@ export function Sidebar({ user, onRoomSelected }: SidebarProps) {
         </Group>
       </Navbar.Section>
 
-      <Navbar.Section grow className={classes.links} component={ScrollArea}>
+      <Navbar.Section grow className={classes.links}>
         <div className={classes.linksInner}>
           {rooms.map((room) => (
             <RoomButton
@@ -153,4 +150,3 @@ export function Sidebar({ user, onRoomSelected }: SidebarProps) {
     </Navbar>
   );
 }
-

@@ -38,7 +38,7 @@ export function createRoom(name: string): Promise<Room> {
 export function editRoom(
   roomId: string,
   changes: Pick<Partial<Room>, "name">
-): Promise<void> {
+): Promise<Room> {
   return apiRequest("rooms/" + roomId, {
     method: "PATCH",
     headers: { "content-type": "application/json" },
