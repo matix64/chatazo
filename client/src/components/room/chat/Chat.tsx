@@ -32,6 +32,19 @@ export function Chat({ room, socket, onOpenInfo }: ChatProps) {
   const [noOlderMessages, setNoOlderMessages] = useState(false);
   const [loadMessages, setLoadMessages] = useState<() => void | undefined>();
 
+  function addMessages(newMessages: Message[]) {
+    setMessages((oldList) => {
+      const all = [...oldList, ...newMessages].sort((a, b) =>
+        a.id.localeCompare(b.id)
+      );
+      const newList: Message[] = [];
+      for (let i = 0; i < all.length; i++) {
+        if (newList[newList.length - 1]?.id != all[i].id) newList.push(all[i]);
+      }
+      return newList;
+    });
+  }
+
   useEffect(() => {
     let canceled = false;
 
@@ -41,7 +54,7 @@ export function Chat({ room, socket, onOpenInfo }: ChatProps) {
         if (canceled) return;
         setNoOlderMessages(resp.noOlder);
         resp.messages.reverse();
-        setMessages((prevMsgs) => [...resp.messages, ...prevMsgs]);
+        addMessages(resp.messages);
       });
     }
     setLoadMessages(() => loadMessages);
@@ -49,9 +62,7 @@ export function Chat({ room, socket, onOpenInfo }: ChatProps) {
     setMessages([]);
     loadMessages();
 
-    const unsubMsgs = socket.onMessage(room.id, (m) =>
-      setMessages((msgs) => [...msgs, m])
-    );
+    const unsubMsgs = socket.onMessage(room.id, (m) => addMessages([m]));
 
     return () => {
       unsubMsgs();
