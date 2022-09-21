@@ -9,7 +9,6 @@ export class User {
   _id: mongoose.Types.ObjectId;
   @Prop({
     required: true,
-    unique: true,
     minlength: 4,
     maxlength: 30,
     trim: true,

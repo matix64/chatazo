@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { compare, hash } from 'bcrypt';
-import { User } from 'src/users/models/user.schema';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { compare, hash } from "bcrypt";
+import { User } from "src/users/models/user.schema";
 
 @Injectable()
 export class AuthService {
@@ -11,8 +11,8 @@ export class AuthService {
     return this.usersService.create(name, email, await hash(pass, 10));
   }
 
-  async validateUser(name: string, pass: string): Promise<User | null> {
-    const user = await this.usersService.findByName(name);
+  async validateUser(email: string, pass: string): Promise<User | null> {
+    const user = await this.usersService.findByEmail(email);
     if (user && (await compare(pass, user.password))) {
       return user;
     }

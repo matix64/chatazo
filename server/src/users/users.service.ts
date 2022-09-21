@@ -21,8 +21,8 @@ export class UsersService extends EventEmitter {
     return created.save();
   }
 
-  async findByName(name: string): Promise<User | null> {
-    return this.userModel.findOne({ name }).exec();
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
   }
 
   async findById(id: string): Promise<User | null> {

@@ -5,13 +5,12 @@ import {
   PasswordInput,
   Checkbox,
   Button,
-  Title,
   Text,
   Anchor,
   Alert,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { login, register } from "../api/auth";
 import { BiErrorCircle } from "react-icons/bi";
 
@@ -66,17 +65,18 @@ export function AuthForm({ onLogin }: AuthFormProps) {
   const [email, setEmail] = useInputState("");
   const [password, setPassword] = useInputState("");
   useEffect(() => setError(undefined), [registering]);
-  function send() {
+  function send(ev: FormEvent<any>) {
+    ev.preventDefault();
     setError(undefined);
     const promi = registering
       ? register(username, email, password)
-      : login(username, password);
+      : login(email, password);
     promi.then(onLogin).catch((e) => setError(e));
   }
   return (
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
-        <div className={classes.formInner}>
+        <form className={classes.formInner} onSubmit={send}>
           {error && (
             <Alert
               icon={<BiErrorCircle size={32} />}
@@ -90,33 +90,38 @@ export function AuthForm({ onLogin }: AuthFormProps) {
               {error.message}
             </Alert>
           )}
-          <TextInput
-            label="Username"
-            mt="md"
-            size="md"
-            value={username}
-            onChange={setUsername}
-          />
           {registering && (
             <TextInput
-              label="Email"
+              label="Name"
               mt="md"
               size="md"
-              value={email}
-              onChange={setEmail}
+              value={username}
+              minLength={4}
+              maxLength={30}
+              onChange={setUsername}
             />
           )}
+          <TextInput
+            label="Email"
+            type="email"
+            mt="md"
+            size="md"
+            value={email}
+            onChange={setEmail}
+          />
           <PasswordInput
             label="Password"
+            minLength={registering ? 8 : 0}
             mt="md"
             size="md"
             value={password}
             onChange={setPassword}
+            autoComplete={registering ? "new-password" : undefined}
           />
           {!registering && (
             <Checkbox label="Keep me logged in" mt="xl" size="md" />
           )}
-          <Button fullWidth mt="xl" size="md" onClick={send}>
+          <Button type="submit" fullWidth mt="xl" size="md">
             {registering ? "Register" : "Login"}
           </Button>
 
@@ -151,7 +156,7 @@ export function AuthForm({ onLogin }: AuthFormProps) {
               </>
             )}
           </Text>
-        </div>
+        </form>
       </Paper>
     </div>
   );

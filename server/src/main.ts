@@ -1,11 +1,11 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { AuthWsAdapter } from './wsadapter';
-import { REDIS } from './redis/redis.module';
-import * as RedisStore from 'connect-redis';
-import * as passport from 'passport';
-import * as session from 'express-session';
+import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { AuthWsAdapter } from "./wsadapter";
+import { REDIS } from "./redis/redis.module";
+import * as RedisStore from "connect-redis";
+import * as passport from "passport";
+import * as session from "express-session";
 
 async function main() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +13,7 @@ async function main() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-    }),
+    })
   );
   const redis = await app.resolve(REDIS);
   const expressMiddle = session({
@@ -21,7 +21,7 @@ async function main() {
       client: redis,
       logErrors: true,
     }),
-    secret: 'nya ichi nii san nya arigato',
+    secret: "nya ichi nii san nya arigato",
     cookie: {
       sameSite: true,
       httpOnly: false,
