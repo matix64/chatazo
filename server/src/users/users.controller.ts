@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 import { LoggedInGuard } from "../auth/logged-in.guard";
 import { EditProfileDto } from "./models/edit-profile.dto";
 import { UserProfileDto } from "./models/user-profile.dto";
@@ -36,6 +37,7 @@ export class UsersController {
   }
 
   @Get(":user_id")
+  @SkipThrottle()
   async getUser(@Param("user_id") userId: string): Promise<UserProfileDto> {
     const user = await this.usersService.findById(userId);
     return {

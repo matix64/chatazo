@@ -10,8 +10,10 @@ import { RegisterDto } from "./models/register.dto";
 import { LocalAuthGuard } from "./local-auth.guard";
 import { AuthService } from "./auth.service";
 import { Request } from "express";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller("auth")
+@Throttle(5, 60)
 export class AuthController {
   constructor(private authService: AuthService) {}
 

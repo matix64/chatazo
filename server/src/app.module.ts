@@ -8,9 +8,15 @@ import { RoomsModule } from "./rooms/rooms.module";
 import { MessagesModule } from "./messages/messages.module";
 import { InvitesModule } from "./invites/invites.module";
 import { readConfig } from "./config";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      ttl: 10,
+      limit: 10,
+    }),
     ConfigModule.forRoot({ load: [readConfig] }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -26,5 +32,6 @@ import { readConfig } from "./config";
     MessagesModule,
     InvitesModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

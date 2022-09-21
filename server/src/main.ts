@@ -6,9 +6,11 @@ import { REDIS } from "./redis/redis.module";
 import * as RedisStore from "connect-redis";
 import * as passport from "passport";
 import * as session from "express-session";
+import helmet from "helmet";
 
 async function main() {
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

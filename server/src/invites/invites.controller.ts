@@ -1,26 +1,27 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { RoomInfoDto } from 'src/rooms/models/room-info.dto';
-import { LoggedInGuard } from '../auth/logged-in.guard';
-import { RoomMemberGuard } from '../rooms/room-member.guard';
-import { User } from '../users/models/user.schema';
-import { CurrentUser } from '../users/user.decorator';
-import { InvitesService } from './invites.service';
-import { InvitePreviewDto } from './models/invite-preview.dto';
-import { InviteDto } from './models/invite.dto';
+import { Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
+import { RoomInfoDto } from "src/rooms/models/room-info.dto";
+import { LoggedInGuard } from "../auth/logged-in.guard";
+import { RoomMemberGuard } from "../rooms/room-member.guard";
+import { User } from "../users/models/user.schema";
+import { CurrentUser } from "../users/user.decorator";
+import { InvitesService } from "./invites.service";
+import { InvitePreviewDto } from "./models/invite-preview.dto";
+import { InviteDto } from "./models/invite.dto";
 
-@Controller('invites')
+@Controller("invites")
 export class InvitesController {
   constructor(private invitesService: InvitesService) {}
 
-  @Post('create/:room_id')
+  @Post("create/:room_id")
   @UseGuards(RoomMemberGuard)
   async createInvite(
     @CurrentUser() user: User,
-    @Param('room_id') roomId: string,
+    @Param("room_id") roomId: string
   ): Promise<InviteDto> {
     const invite = await this.invitesService.create(
       user._id.toString(),
-      roomId,
+      roomId
     );
     return {
       id: invite._id.toString(),
@@ -29,18 +30,20 @@ export class InvitesController {
     };
   }
 
-  @Get(':invite_id')
+  @Get(":invite_id")
+  @Throttle(5, 60)
   async viewInvite(
-    @Param('invite_id') inviteId: string,
+    @Param("invite_id") inviteId: string
   ): Promise<InvitePreviewDto> {
     return this.invitesService.getPreview(inviteId);
   }
 
-  @Post(':invite_id')
+  @Post(":invite_id")
   @UseGuards(LoggedInGuard)
+  @Throttle(5, 60)
   async useInvite(
     @CurrentUser() user: User,
-    @Param('invite_id') inviteId: string,
+    @Param("invite_id") inviteId: string
   ): Promise<RoomInfoDto> {
     const room = await this.invitesService.use(inviteId, user._id.toString());
     return {
