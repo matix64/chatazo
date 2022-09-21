@@ -118,9 +118,6 @@ export function AuthForm({ onLogin }: AuthFormProps) {
             onChange={setPassword}
             autoComplete={registering ? "new-password" : undefined}
           />
-          {!registering && (
-            <Checkbox label="Keep me logged in" mt="xl" size="md" />
-          )}
           <Button type="submit" fullWidth mt="xl" size="md">
             {registering ? "Register" : "Login"}
           </Button>
