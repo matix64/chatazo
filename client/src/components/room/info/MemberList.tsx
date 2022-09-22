@@ -30,14 +30,22 @@ const useStyles = createStyles((theme, _, getRef) => ({
       paddingBottom: theme.spacing.xs,
     },
   },
-  nameAvatar: {
+  nameStatusAvatar: {
     display: "flex",
     alignItems: "center",
     paddingLeft: theme.spacing.sm,
   },
-  memberName: {
+  nameStatus: {
+    display: "flex",
+    flexDirection: "column",
     marginLeft: theme.spacing.md,
+  },
+  memberName: {
     fontWeight: "bold",
+  },
+  memberStatus: {
+    color: "#aaa",
+    fontSize: "14px",
   },
   actions: {
     ref: getRef("actions"),
@@ -76,9 +84,12 @@ export function MemberList({
       <tbody>
         {members.map((member) => (
           <tr className={classes.member} key={member.id}>
-            <td className={classes.nameAvatar}>
+            <td className={classes.nameStatusAvatar}>
               <Avatar src={member.picture} radius="xl" />
-              <span className={classes.memberName}>{member.name}</span>
+              <div className={classes.nameStatus}>
+                <span className={classes.memberName}>{member.name}</span>
+                <span className={classes.memberStatus}>{member.status}</span>
+              </div>
             </td>
             <td style={{ textAlign: "center" }}>
               {member.role < currUserMember.role &&
