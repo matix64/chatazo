@@ -7,7 +7,7 @@ import {
   TypographyStylesProvider,
   Paper,
 } from "@mantine/core";
-import { formatDistance } from "date-fns";
+import { formatRelative } from "date-fns";
 import { getUser, User } from "../../../api/users";
 import { useEffect, useState } from "react";
 import { WsConnection } from "../../../api/socket";
@@ -27,11 +27,17 @@ const useStyles = createStyles((theme) => ({
     overflowWrap: "anywhere",
     padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
     marginTop: theme.spacing.md,
+    display: "flex",
+  },
+
+  nameDate: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "5px",
   },
 
   body: {
-    paddingLeft: 54,
-    paddingTop: theme.spacing.sm,
+    paddingLeft: theme.spacing.md,
     fontSize: theme.fontSizes.sm,
   },
 
@@ -77,16 +83,19 @@ export function MessageView({ msg, socket }: MessageViewProps) {
   } else
     return (
       <Paper withBorder radius="md" className={classes.message}>
-        <Group>
-          <Avatar src={author?.picture} radius="xl" />
-          <div>
-            <Text size="sm">{author?.name}</Text>
+        <Avatar src={author?.picture} radius="xl" />
+        <TypographyStylesProvider className={classes.body}>
+          <div className={classes.nameDate}>
+            <Text size="sm" weight="bold">
+              {author?.name}
+            </Text>
+            <Text size="xs" mx="5px" color="dimmed">
+              —
+            </Text>
             <Text size="xs" color="dimmed">
-              {formatDistance(msg.date, new Date(), { addSuffix: true })}
+              {formatRelative(msg.date, new Date())}
             </Text>
           </div>
-        </Group>
-        <TypographyStylesProvider className={classes.body}>
           <div className={classes.content}>
             {msg.content.map((sect, i) => {
               switch (sect.type) {
