@@ -58,14 +58,33 @@ export function RoomName({ room, editable }: RoomNameProps) {
         ref={nameRef}
         contentEditable={editing}
         onBlur={finishEdit}
+        style={{ overflow: "scroll" }}
         onKeyDown={(ev) => {
+          const target = ev.target as HTMLHeadingElement;
           if (ev.key == "Enter") {
             ev.preventDefault();
             finishEdit();
           } else if (ev.key == "Escape") {
             ev.preventDefault();
             cancelEdit();
-          }
+          } else if (
+            !ev.ctrlKey &&
+            ev.key.length < 3 &&
+            (target.textContent?.length || 0) + ev.key.length > 40
+          )
+            ev.preventDefault();
+        }}
+        onPaste={(ev) => {
+          ev.preventDefault();
+          const target = ev.target as HTMLHeadingElement;
+          const selection = window.getSelection();
+          if (!selection?.rangeCount) return;
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+          const paste = ev.clipboardData
+            .getData("text")
+            .slice(0, 40 - (target.textContent?.length || 0));
+          range.insertNode(document.createTextNode(paste));
         }}
       >
         {room.name}

@@ -39,6 +39,7 @@ export function AppLoggedIn({ user, socket, onLogout }: AppLoggedInProps) {
                 : theme.colors.gray[0],
             height: "100vh",
             padding: 0,
+            overflow: "hidden",
           },
         })}
       >
