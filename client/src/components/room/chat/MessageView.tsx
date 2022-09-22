@@ -14,6 +14,7 @@ import { WsConnection } from "../../../api/socket";
 
 const useStyles = createStyles((theme) => ({
   event: {
+    overflowWrap: "anywhere",
     display: "flex",
     alignItems: "center",
     height: "50px",
@@ -23,6 +24,7 @@ const useStyles = createStyles((theme) => ({
   },
 
   message: {
+    overflowWrap: "anywhere",
     padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
     marginTop: theme.spacing.md,
   },

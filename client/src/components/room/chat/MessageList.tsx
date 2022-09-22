@@ -18,7 +18,7 @@ const useStyles = createStyles((theme) => ({
   container: {
     flexGrow: 1,
     overflow: "auto",
-    paddingLeft: theme.spacing.md,
+    padding: theme.spacing.md,
     scrollbarColor: "#ccc rgba(0,0,0,0)",
     "&::-webkit-scrollbar": {
       width: "1em",
