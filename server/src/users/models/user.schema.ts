@@ -18,11 +18,7 @@ export class User {
   email: string;
   @Prop({ required: true })
   password: string;
-  @Prop({
-    maxlength: 500,
-    validate: [(s: string) => isURL(s, { protocols: ["http", "https"] })],
-    trim: true,
-  })
+  @Prop({ maxlength: 100 })
   picture: string;
   @Prop({ maxlength: 60, default: "", trim: true })
   status: string;

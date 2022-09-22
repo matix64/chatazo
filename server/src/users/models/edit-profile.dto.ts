@@ -5,9 +5,6 @@ export class EditProfileDto {
   @IsString()
   name?: string;
   @IsOptional()
-  @IsUrl({ protocols: ["http", "https"] })
-  picture?: string;
-  @IsOptional()
   @IsString()
   status?: string;
 }

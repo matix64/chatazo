@@ -1,4 +1,4 @@
-import { apiRequest } from "./api";
+import { apiRequest, getApiPath } from "./api";
 import { RequestRejectedError } from "./request-error";
 
 export interface User {
@@ -19,6 +19,7 @@ const USER_CACHE: Record<string, Promise<User>> = {};
 export async function getCurrentUser(): Promise<User | undefined> {
   try {
     const user: User = await apiRequest("users/me");
+    user.picture = user.picture && getApiPath(user.picture);
     return user;
   } catch (err) {
     if (err instanceof RequestRejectedError && err.status == 401)
@@ -28,7 +29,12 @@ export async function getCurrentUser(): Promise<User | undefined> {
 }
 
 export async function getUser(id: string): Promise<User> {
-  if (!USER_CACHE[id]) USER_CACHE[id] = apiRequest("users/" + id);
+  if (!USER_CACHE[id])
+    USER_CACHE[id] = (async () => {
+      const user: User = await apiRequest("users/" + id);
+      user.picture = user.picture && getApiPath(user.picture);
+      return user;
+    })();
   return await USER_CACHE[id];
 }
 
@@ -36,10 +42,6 @@ export function addToUserCache(user: User) {
   USER_CACHE[user.id] = Promise.resolve(user);
 }
 
-export function editProfile(changes: EditProfileChanges): Promise<User> {
-  return apiRequest("users/me", {
-    method: "PATCH",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(changes),
-  });
+export function getEditProfileEndpoint(): string {
+  return getApiPath("users/me");
 }

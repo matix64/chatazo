@@ -10,6 +10,7 @@ import { InvitesModule } from "./invites/invites.module";
 import { readConfig } from "./config";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { APP_GUARD } from "@nestjs/core";
       ttl: 10,
       limit: 10,
     }),
+    ServeStaticModule.forRoot({ rootPath: "./uploads", serveRoot: "/uploads" }),
     ConfigModule.forRoot({ load: [readConfig] }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

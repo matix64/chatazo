@@ -5,13 +5,19 @@ import {
   Divider,
   TextInput,
 } from "@mantine/core";
-import { useState } from "react";
-import { editProfile, EditProfileChanges, User } from "../../api/users";
+import { FormEvent, useState } from "react";
+import { getEditProfileEndpoint, User } from "../../api/users";
 
 const useStyles = createStyles(() => ({
   container: {
     display: "flex",
     alignItems: "center",
+  },
+  picture: {
+    cursor: "pointer",
+    fontSize: "12px",
+    color: "#23aaf2",
+    "&:hover": { textDecoration: "underline" },
   },
   nameStatus: { marginLeft: "15px", flexGrow: 1 },
 }));
@@ -25,33 +31,58 @@ export function EditProfileModal({ user, close }: EditProfileModalProps) {
   const { classes } = useStyles();
   const [name, setName] = useState(user.name);
   const [status, setStatus] = useState(user.status);
+  const [picture, setPicture] = useState(user.picture);
 
-  function getChangedFields(): [string, string][] {
-    const oldValues = user as unknown as Record<string, string>;
-    const currValues: Record<string, string> = { name, status };
+  function getChangedFields(): [string, any][] {
+    const oldValues = user as unknown as Record<string, any>;
+    const currValues: Record<string, any> = {
+      name: name.trim(),
+      status: status.trim(),
+      picture,
+    };
     return Object.entries(currValues).filter(
-      ([key, value]) => value.trim() != oldValues[key]
+      ([key, value]) => value != oldValues[key]
     );
   }
 
-  async function save() {
+  async function submit(ev: FormEvent<HTMLFormElement>) {
+    ev.preventDefault();
+    await fetch(getEditProfileEndpoint(), {
+      method: "PATCH",
+      body: new FormData(ev.currentTarget),
+    });
     close();
-    await editProfile(Object.fromEntries(getChangedFields()));
   }
 
   return (
-    <>
+    <form onSubmit={submit}>
       <div className={classes.container}>
-        <Avatar src={user.picture} radius={100} size="xl" />
+        <label className={classes.picture}>
+          <input
+            type="file"
+            name="picture"
+            style={{ display: "none" }}
+            accept="image/png, image/jpeg, image/webp"
+            onChange={({ target }) =>
+              target.files &&
+              target.files[0] &&
+              setPicture(URL.createObjectURL(target.files[0]))
+            }
+          />
+          <Avatar src={picture} radius={100} size="xl" mb="xs" />
+          Change picture
+        </label>
         <div className={classes.nameStatus}>
           <TextInput
             label="Name"
+            name="name"
             value={name}
             maxLength={30}
             onChange={(ev) => setName(ev.target.value)}
           />
           <TextInput
             label="Status"
+            name="status"
             mt="sm"
             value={status}
             maxLength={60}
@@ -62,7 +93,7 @@ export function EditProfileModal({ user, close }: EditProfileModalProps) {
       {getChangedFields().length > 0 && (
         <>
           <Divider my="md" />
-          <Button ml="md" sx={{ float: "right" }} onClick={save}>
+          <Button ml="md" sx={{ float: "right" }} type="submit">
             Save
           </Button>
           <Button variant="outline" sx={{ float: "right" }} onClick={close}>
@@ -70,6 +101,6 @@ export function EditProfileModal({ user, close }: EditProfileModalProps) {
           </Button>
         </>
       )}
-    </>
+    </form>
   );
 }

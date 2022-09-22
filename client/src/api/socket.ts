@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { getApiPath } from "./api";
 import { Message } from "./messages";
 import { Room } from "./rooms";
 import { addToUserCache, User } from "./users";
@@ -20,7 +21,8 @@ export class WsConnection {
     this.socket.on("roomChanged", (room) =>
       this.roomChangedSubs.forEach((cb) => cb(room))
     );
-    this.socket.on("userChanged", (user) => {
+    this.socket.on("userChanged", (user: User) => {
+      user.picture = user.picture && getApiPath(user.picture);
       addToUserCache(user);
       this.userChangedSubs[user.id]?.forEach((cb) => cb(user));
     });
