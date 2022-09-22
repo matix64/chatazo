@@ -15,26 +15,10 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: 0,
   },
 
-  header: {
-    padding: theme.spacing.md,
-    paddingTop: 0,
-    marginLeft: -theme.spacing.md,
-    marginRight: -theme.spacing.md,
-    color: theme.colorScheme === "dark" ? theme.white : theme.black,
-    borderBottom: `1px solid ${
-      theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[3]
-    }`,
-  },
-
   links: {
     marginLeft: -theme.spacing.md,
     marginRight: -theme.spacing.md,
     overflowY: "auto",
-  },
-
-  linksInner: {
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.xl,
   },
 
   footer: {
@@ -115,23 +99,15 @@ export function Sidebar({
       pt="md"
       className={classes.navbar}
     >
-      <Navbar.Section className={classes.header}>
-        <Group position="apart">
-          <Code sx={{ fontWeight: 700 }}>Chatazo v0.0.1</Code>
-        </Group>
-      </Navbar.Section>
-
       <Navbar.Section grow className={classes.links}>
-        <div className={classes.linksInner}>
-          {rooms.map((room) => (
-            <RoomButton
-              key={room.id}
-              room={room}
-              onClick={() => setSelectedRoom(room)}
-              selected={selectedRoom == room}
-            />
-          ))}
-        </div>
+        {rooms.map((room) => (
+          <RoomButton
+            key={room.id}
+            room={room}
+            onClick={() => setSelectedRoom(room)}
+            selected={selectedRoom == room}
+          />
+        ))}
       </Navbar.Section>
 
       <Navbar.Section>
