@@ -22,12 +22,14 @@ const useStyles = createStyles((theme) => ({
   },
 
   selectedLink: {
-    "&, &:hover": {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[7]
-          : theme.colors.gray[0],
-      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+    [`@media (min-width: ${theme.breakpoints.sm}px)`]: {
+      "&, &:hover": {
+        backgroundColor:
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[7]
+            : theme.colors.gray[0],
+        color: theme.colorScheme === "dark" ? theme.white : theme.black,
+      },
     },
   },
 }));

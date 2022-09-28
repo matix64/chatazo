@@ -24,9 +24,10 @@ interface ChatProps {
   room: Room;
   socket: WsConnection;
   onOpenInfo: () => void;
+  onOpenMenu: () => void;
 }
 
-export function Chat({ room, socket, onOpenInfo }: ChatProps) {
+export function Chat({ room, socket, onOpenInfo, onOpenMenu }: ChatProps) {
   const { classes } = useStyles();
   const [messages, setMessages] = useState<Message[]>([]);
   const [noOlderMessages, setNoOlderMessages] = useState(false);
@@ -72,7 +73,7 @@ export function Chat({ room, socket, onOpenInfo }: ChatProps) {
 
   return (
     <div className={classes.container}>
-      <Topbar room={room} onClickName={onOpenInfo} />
+      <Topbar room={room} onClickName={onOpenInfo} onClickMenu={onOpenMenu} />
       {loadMessages && (
         <MessageList
           messages={messages}

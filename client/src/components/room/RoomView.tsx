@@ -14,9 +14,10 @@ interface RoomViewProps {
   user: User;
   room: Room;
   socket: WsConnection;
+  onOpenMenu: () => void;
 }
 
-export function RoomView({ user, room, socket }: RoomViewProps) {
+export function RoomView({ user, room, socket, onOpenMenu }: RoomViewProps) {
   const [screen, setScreen] = useState<Screen>(Screen.Chat);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export function RoomView({ user, room, socket }: RoomViewProps) {
             history.pushState(null, "", "");
             setScreen(Screen.RoomInfo);
           }}
+          onOpenMenu={onOpenMenu}
         />
       );
     case Screen.RoomInfo:

@@ -1,5 +1,5 @@
 import { User } from "../../api/users";
-import { Navbar, Group, Code, createStyles, Divider } from "@mantine/core";
+import { Navbar, createStyles, Divider } from "@mantine/core";
 import { useModals } from "@mantine/modals";
 import { UserButton } from "./UserButton";
 import { RoomButton } from "./RoomButton";
@@ -13,6 +13,12 @@ const useStyles = createStyles((theme) => ({
     backgroundColor:
       theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.white,
     paddingBottom: 0,
+  },
+
+  navbarClosed: {
+    [`@media (max-width: ${theme.breakpoints.sm}px)`]: {
+      display: "none",
+    },
   },
 
   links: {
@@ -35,6 +41,8 @@ interface SidebarProps {
   socket: WsConnection;
   onRoomSelected: (room: Room | undefined) => void;
   onLogout: () => void;
+  open: boolean;
+  onClose: () => void;
 }
 
 export function Sidebar({
@@ -42,6 +50,8 @@ export function Sidebar({
   socket,
   onRoomSelected,
   onLogout,
+  open,
+  onClose,
 }: SidebarProps) {
   const { classes } = useStyles();
   const modals = useModals();
@@ -85,6 +95,7 @@ export function Sidebar({
             setRooms((rooms) => [...rooms, room]);
             setSelectedRoom(room);
             modals.closeModal(id);
+            onClose();
           }}
         />
       ),
@@ -97,14 +108,17 @@ export function Sidebar({
       height="100vh"
       px="md"
       pt="md"
-      className={classes.navbar}
+      className={`${classes.navbar} ${open ? "" : classes.navbarClosed}`}
     >
       <Navbar.Section grow className={classes.links}>
         {rooms.map((room) => (
           <RoomButton
             key={room.id}
             room={room}
-            onClick={() => setSelectedRoom(room)}
+            onClick={() => {
+              setSelectedRoom(room);
+              onClose();
+            }}
             selected={selectedRoom == room}
           />
         ))}
