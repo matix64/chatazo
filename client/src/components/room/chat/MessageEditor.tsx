@@ -72,6 +72,8 @@ export function MessageEditor({ label, onSubmit }: MessageEditorProps) {
         aria-label={label}
         aria-multiline="true"
         contentEditable="true"
+        // @ts-ignore
+        enterKeyHint="send"
         className={classes.editable}
         onKeyDown={(ev) => {
           if (ev.key == "Enter" && !ev.shiftKey) {
