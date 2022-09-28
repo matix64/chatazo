@@ -1,5 +1,5 @@
 import { Alert, Button, TextInput } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiErrorCircle } from "react-icons/bi";
 import { createRoom, Room } from "../../api/rooms";
 
@@ -8,7 +8,15 @@ export interface CreateRoomModalProps {
 }
 
 export function CreateRoomModal({ onCreated }: CreateRoomModalProps) {
+  const nameInput = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState<Error | undefined>();
+
+  useEffect(() => {
+    if (nameInput.current) {
+      const input = nameInput.current;
+      setTimeout(() => input.focus());
+    }
+  }, [nameInput]);
 
   return (
     <>
@@ -35,7 +43,13 @@ export function CreateRoomModal({ onCreated }: CreateRoomModalProps) {
             .catch(setError);
         }}
       >
-        <TextInput name="roomname" label="Name" required maxLength={40} />
+        <TextInput
+          name="roomname"
+          label="Name"
+          required
+          maxLength={40}
+          ref={nameInput}
+        />
         <Button type="submit" fullWidth mt="md">
           Create
         </Button>
